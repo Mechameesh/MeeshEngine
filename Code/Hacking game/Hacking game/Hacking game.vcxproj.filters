@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Input.cpp">
+      <Filter>Engine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Engine\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio.cpp">
+      <Filter>Engine\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game_hack.cpp">
+      <Filter>Game\Modes</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteShader.cpp">
+      <Filter>Engine\Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="SYS_Math.cpp">
+      <Filter>Engine\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders.cpp">
+      <Filter>Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardShader.cpp">
+      <Filter>Engine\Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="SCENE_Camera.cpp">
+      <Filter>Engine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SCENE_Sprite.cpp">
+      <Filter>Engine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SCENE_scene.cpp">
+      <Filter>Engine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SYS_Thread.cpp">
+      <Filter>Engine\System</Filter>
+    </ClCompile>
+    <ClCompile Include="SCENE_Mesh.cpp">
+      <Filter>Engine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SYS_File.cpp">
+      <Filter>Engine\System</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Input.h">
+      <Filter>Engine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Engine\Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio.h">
+      <Filter>Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game_hack.h">
+      <Filter>Game\Modes</Filter>
+    </ClInclude>
+    <ClInclude Include="SYS_Math.h">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteShader.h">
+      <Filter>Engine\Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders.h">
+      <Filter>Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardShader.h">
+      <Filter>Engine\Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="SCENE_Camera.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SCENE_Sprite.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SCENE_scene.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SCENE_Mesh.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SYS_File.h">
+      <Filter>Engine\System</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{401968f8-87fe-4cbe-980f-2ef72b403af7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Input">
+      <UniqueIdentifier>{b70938dc-b5ea-4d8e-be3a-da9b30cbb3af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics">
+      <UniqueIdentifier>{8ce833c9-8a16-464d-b98d-f46411c0b80f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Timer">
+      <UniqueIdentifier>{61bad530-9fd9-4e8f-afd7-5f13f36b0904}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Audio">
+      <UniqueIdentifier>{0952bb31-cac0-4be6-b734-30801dad4968}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{733b8122-1cd4-46ec-a810-7617a62f3045}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Modes">
+      <UniqueIdentifier>{0d108805-c378-4e01-8272-7e4d6ac9fd5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Math">
+      <UniqueIdentifier>{d254af5c-a7da-445d-bc8d-79a06dbf7262}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\Shaders">
+      <UniqueIdentifier>{f87c2727-d516-4fd0-bbf7-0284a14f6a89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\Shaders\HLSL">
+      <UniqueIdentifier>{978e5ee7-a9ac-4e12-aa58-40f81bdb6189}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Scene">
+      <UniqueIdentifier>{47427c52-63ac-415c-aae8-cc0b2b01dcc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\System">
+      <UniqueIdentifier>{74a0dafc-1d0d-4091-9f6b-2bb0fa69138e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="spriteshader.fx">
+      <Filter>Engine\Graphics\Shaders\HLSL</Filter>
+    </None>
+    <None Include="Standard.fx">
+      <Filter>Engine\Graphics\Shaders\HLSL</Filter>
+    </None>
+  </ItemGroup>
+</Project>
