@@ -690,8 +690,7 @@ void GFX_SetPrimitiveType(int type)
 
 void GFX_SetTexture(const gfx_texture * tex, int level)
 {
-
-	gfx_devicecontext->PSSetShaderResources(level, 1, &tex->dxTexture);
+	gfx_devicecontext->PSSetShaderResources(level, 1, &tex->dxTexture);	
 }
 
 void GFX_SetSamplerState(int index, gfx_samplerstate * state)

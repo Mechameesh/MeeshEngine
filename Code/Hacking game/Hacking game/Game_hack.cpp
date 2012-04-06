@@ -103,10 +103,8 @@ game_mode * GAME_CreateHackMode()
 void game_hackmode::Enter()
 {
 	textures[0] = GFX_LoadTexture("data/textures/kingdede.png");
-	textures[1] = GFX_LoadTexture("data/textures/placeholder.png");
-	//mesh = SCENE_LoadMesh("data\\models\\monkey.msh");
-	math_vec3 campos = {0.0, 0.0f, 50.0f};	
-	//camera = SCENE_CreateCamera(M_PI / 2.0f, &campos, false);
+	textures[1] = GFX_LoadTexture("data/textures/placeholder.png");	
+	math_vec3 campos = {0.0, 0.0f, 50.0f};			
 	camera = SCENE_CreateCamera(M_PI / 2.0f, &campos, true);
 
 	/*GenerateHack();
@@ -152,7 +150,9 @@ void game_hackmode::Update(int dt)
 
 void game_hackmode::Draw()
 {
-	//SHADER_DrawMesh(mesh, SHADER_FLATSHADER);
+	gfx_colour colour = {1.0f, 1.0f, 1.0f, 1.0f};	
+	SHADER_RenderSprite(0, 0, 0.5f, 0.5f, textures[1], &colour);
+	SHADER_RenderSprite(0.5f, 0.5f, 0.5f, 0.5f, 0, &colour);	
 }
 
 /******************************************************/
