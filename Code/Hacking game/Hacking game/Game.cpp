@@ -20,7 +20,7 @@ static game_mode * game_modes[GAME_NMODES];
 
 bool GAME_Init(game_initsettings settings)
 {
-	memset(game_modestack, -1, sizeof(game_modestack));
+	memset(game_modestack, -1, sizeof(game_modestack));	
 
 	game_modes[GAME_MODE_HACK] = GAME_CreateHackMode();
 	
@@ -48,9 +48,11 @@ void GAME_Update()
 	if(INPUT_KeyDown(VK_ESCAPE))
 		PostQuitMessage(0);	
 
-	AUDIO_Update(TIME_GetDelta());
+	int dt = TIME_GetDelta();
+
+	AUDIO_Update(dt);
 	
-	game_modes[game_modestack[game_modestackcurrent]]->Update();	
+	game_modes[game_modestack[game_modestackcurrent]]->Update(dt);	
 	
 	INPUT_Update();	
 }

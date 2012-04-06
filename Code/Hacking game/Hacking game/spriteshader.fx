@@ -1,14 +1,14 @@
 Texture2D diffuse : register(t0);
-SamplerState linear : register(s0);
+SamplerState samLinear : register(s0);
 
-cbuffer matrixbuffer
+cbuffer matrixbuffer : register(b0)
 {
 	matrix wvp;
 };
 
 struct VS_INPUT
 {
-	float4 Pos : POSITION;
+	float3 Pos : POSITION;
 	float2 Tex : TEXCOORD0;
 };
 
@@ -21,12 +21,12 @@ struct PS_INPUT
 PS_INPUT VS(VS_INPUT input)
 {
 	PS_INPUT output;
-	output.Pos = mul(input.Pos, wvp);
+	output.Pos = mul(float4(input.Pos, 1), wvp);
 	output.Tex = input.Tex;
 	return output;
 }
 
-float4 PS(float4 pos : SV_POSITION) : SV_Target
+float4 PS(PS_INPUT input) : SV_Target
 {
-	return diffuse.Sample(linear, input.Tex);
+	return diffuse.Sample(samLinear, input.Tex);
 }

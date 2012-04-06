@@ -8,75 +8,175 @@
 
 struct shader_spritevertex
 {
-	math_vec4 pos;
+	math_vec3 pos;
 	math_vec2 tex;
+};
+
+struct shader_spritecbuffer
+{
+	math_matrix4 wvp;
 };
 
 /*********************************************************/
 
 static gfx_vertexshader * shader_spritevertexshader;
 static gfx_pixelshader * shader_spritepixelshader;
+static gfx_constantbuffer * shader_spritevertexcbuffer;
+
+static gfx_samplerstate * shader_spritesampler;
+static shader_spritecbuffer shader_cbuffer;
 
 static gfx_vertexbuffer * shader_spritevertexbuffer;
-
-static shader_spritevertex shader_spritevertices[6];
 
 /*********************************************************/
 
 void SHADER_InitSpriteShader()
 {	
-	gfx_vertexdesc desc[2];
-	sprintf_s(desc[0].semantic, 32, "POSITION");
-	desc[0].vertexformat = GFX_VERTEXFORMAT_RG_FLOAT;
-	sprintf_s(desc[1].semantic, 32, "TEXCOORD0");
-	desc[1].vertexformat = GFX_VERTEXFORMAT_RG_FLOAT;
+	gfx_vertexdesc desc[2] = 
+	{
+		{"POSITION", GFX_VERTEXFORMAT_RGB_FLOAT},
+		{"TEXCOORD", GFX_VERTEXFORMAT_RG_FLOAT}
+	};
 
-	shader_spritevertexshader = GFX_LoadVertexShader("spriteshader.fx", "VS", desc);
-	shader_spritepixelshader = GFX_LoadPixelShader("spriteshader.fx", "PS");
-	shader_spritevertexbuffer = GFX_CreateVertexBuffer(0, 4, sizeof(float), false);
+	shader_spritevertexshader = GFX_LoadVertexShader("data\\shaders\\spriteshader.fx", "VS", desc, 2);
+	shader_spritepixelshader = GFX_LoadPixelShader("data\\shaders\\spriteshader.fx", "PS");	
+	shader_spritevertexbuffer = GFX_CreateVertexBuffer(0, 6, sizeof(shader_spritevertex), false);
+	shader_spritevertexcbuffer = GFX_CreateConstantBuffer(sizeof(shader_spritecbuffer));
 
-	for(int i = 0; i < 6; ++i)
-		shader_spritevertices[i].pos.z = 0.5;
+	shader_spritesampler = GFX_CreateSamplerState(GFX_FILTER_MIN_MAG_MIP_LINEAR, GFX_TEXTURE_ADDRESS_WRAP, GFX_TEXTURE_ADDRESS_WRAP, GFX_TEXTURE_ADDRESS_WRAP);
 }
 
 void SHADER_ShutDownSpriteShader()
 {
-	GFX_FreeVertexBuffer(shader_spritevertexbuffer);	
+	GFX_FreeVertexBuffer(shader_spritevertexbuffer);
+	GFX_FreeConstantBuffer(shader_spritevertexcbuffer);
 }
 
-void SHADER_RenderSprite(math_vec2 pos, float width, float height, gfx_texture * texture)
+void SHADER_UpdateSpriteShader(const math_matrix4 * wvp)
 {
-	SHADER_RenderSpriteUV(pos, width, height, 0.0f, 0.0f, 1.0f, 1.0f, texture);
+	MATH_Matrix4Copy(&shader_cbuffer.wvp, wvp);
+	GFX_UpdateConstantBuffer(shader_spritevertexcbuffer, &shader_cbuffer);
 }
 
-void SHADER_RenderSpriteUV(math_vec2 pos, float width, float height, float u0, float v0, float u1, float v1, gfx_texture * texture)
+void SHADER_RenderSpriteAbs(int x, int y, int width, int height, const gfx_texture * texture)
+{
+	SHADER_RenderSpriteAbsUV(x, y, width, height, 0.0f, 1.0f, 0.0f, 1.0f, texture);
+}
+
+void SHADER_RenderSpriteAbsUV(int x, int y, int width, int height, float u0, float u1, float v0, float v1, const gfx_texture * texture)
 {
 	GFX_EnableBuffer(GFX_BUFFER_DEPTH, false);
 
-	shader_spritevertices[0].pos.x = pos.x;
-	shader_spritevertices[0].pos.y = pos.y;
-	shader_spritevertices[1].pos.x = pos.x + width;
-	shader_spritevertices[1].pos.y = pos.y;
-	shader_spritevertices[2].pos.x = pos.x;
-	shader_spritevertices[2].pos.y = pos.y - height;
-	shader_spritevertices[3].pos = shader_spritevertices[2].pos;
-	shader_spritevertices[4].pos = shader_spritevertices[1].pos;
-	shader_spritevertices[5].pos.x = pos.x + width;
-	shader_spritevertices[5].pos.y = pos.y - height;
+	float left = (float)((GFX_GetXRes() / 2) * -1) + (float)x;
+	float right = left + (float)width;
+	float top = (float)(GFX_GetYRes() / 2) - (float)y;
+	float bottom = top - (float)height;
 
-	shader_spritevertices[0].tex.x = u0;
-	shader_spritevertices[0].tex.y = v0;
-	shader_spritevertices[1].tex.x = u1;
-	shader_spritevertices[1].tex.y = v0;
-	shader_spritevertices[2].tex.x = u0;
-	shader_spritevertices[2].tex.y = v1;
-	shader_spritevertices[3].tex = shader_spritevertices[2].tex;
-	shader_spritevertices[4].tex = shader_spritevertices[1].tex;
-	shader_spritevertices[5].tex.x = u1;
-	shader_spritevertices[5].tex.y = v1;
+	shader_spritevertex * vbufferdata;
+	GFX_LockVertexBufferWrite(shader_spritevertexbuffer, (void**)&vbufferdata);
+		
+	vbufferdata[0].pos.x = left;
+	vbufferdata[0].pos.y = top;	
+	vbufferdata[0].pos.z = 0.0f;
+	vbufferdata[0].tex.x = u0;
+	vbufferdata[0].tex.y = v0;
 
+	vbufferdata[1].pos.x = right;
+	vbufferdata[1].pos.y = bottom;
+	vbufferdata[1].pos.z = 0.0f;
+	vbufferdata[1].tex.x = u1;
+	vbufferdata[1].tex.y = v1;
+
+	vbufferdata[2].pos.x = left;
+	vbufferdata[2].pos.y = bottom;
+	vbufferdata[2].pos.z = 0.0f;
+	vbufferdata[2].tex.x = u0;
+	vbufferdata[2].tex.y = v1;
+
+	vbufferdata[3].pos = vbufferdata[0].pos;
+	vbufferdata[3].tex = vbufferdata[0].tex;
+
+	vbufferdata[4].pos.x = right;
+	vbufferdata[4].pos.y = top;
+	vbufferdata[4].pos.z = 0.0f;
+	vbufferdata[4].tex.x = u1;
+	vbufferdata[4].tex.y = v0;
+
+	vbufferdata[5].pos = vbufferdata[1].pos;	
+	vbufferdata[5].tex = vbufferdata[1].tex;
+	GFX_UnlockVertexBuffer(shader_spritevertexbuffer);
+
+	GFX_SetCurrentVertexBuffer(shader_spritevertexbuffer, 0);
 	GFX_SetPrimitiveType(GFX_PRIMITIVETYPE_TRIANGLELIST);
-	GFX_DrawPrimitives(shader_spritevertexshader, shader_spritepixelshader, 6);
+	GFX_SetVertexShader(shader_spritevertexshader);
+	GFX_SetPixelShader(shader_spritepixelshader);
+	GFX_SetVertexConstantBuffer(shader_spritevertexcbuffer);
+	GFX_SetSamplerState(0, shader_spritesampler);
+	GFX_SetTexture(texture, 0);
+	GFX_DrawPrimitives(6);
+
+	GFX_EnableBuffer(GFX_BUFFER_DEPTH, true);
+}
+
+void SHADER_RenderSprite(float x, float y, float width, float height, const gfx_texture * texture)
+{
+	SHADER_RenderSpriteUV(x, y, width, height, 0.0f, 0.0f, 1.0f, 1.0f, texture);
+}
+
+void SHADER_RenderSpriteUV(float x, float y, float width, float height, float u0, float v0, float u1, float v1,const gfx_texture * texture)
+{
+	GFX_EnableBuffer(GFX_BUFFER_DEPTH, false);
+
+	float xres = (float)GFX_GetXRes();
+	float yres = (float)GFX_GetYRes();
+
+	float left = ((xres / 2.0) * - 1.0) + (x * xres);
+	float right = left + (width * xres);
+	float top = (yres / 2) - (y * yres);
+	float bottom = top - (height * yres);
+
+	shader_spritevertex * vbufferdata;
+	GFX_LockVertexBufferWrite(shader_spritevertexbuffer, (void**)&vbufferdata);
+		
+	vbufferdata[0].pos.x = left;
+	vbufferdata[0].pos.y = top;	
+	vbufferdata[0].pos.z = 0.0f;
+	vbufferdata[0].tex.x = u0;
+	vbufferdata[0].tex.y = v0;
+
+	vbufferdata[1].pos.x = right;
+	vbufferdata[1].pos.y = bottom;
+	vbufferdata[1].pos.z = 0.0f;
+	vbufferdata[1].tex.x = u1;
+	vbufferdata[1].tex.y = v1;
+
+	vbufferdata[2].pos.x = left;
+	vbufferdata[2].pos.y = bottom;
+	vbufferdata[2].pos.z = 0.0f;
+	vbufferdata[2].tex.x = u0;
+	vbufferdata[2].tex.y = v1;
+
+	vbufferdata[3].pos = vbufferdata[0].pos;
+	vbufferdata[3].tex = vbufferdata[0].tex;
+
+	vbufferdata[4].pos.x = right;
+	vbufferdata[4].pos.y = top;
+	vbufferdata[4].pos.z = 0.0f;
+	vbufferdata[4].tex.x = u1;
+	vbufferdata[4].tex.y = v0;
+
+	vbufferdata[5].pos = vbufferdata[1].pos;	
+	vbufferdata[5].tex = vbufferdata[1].tex;
+	GFX_UnlockVertexBuffer(shader_spritevertexbuffer);
+
+	GFX_SetCurrentVertexBuffer(shader_spritevertexbuffer, 0);
+	GFX_SetPrimitiveType(GFX_PRIMITIVETYPE_TRIANGLELIST);
+	GFX_SetVertexShader(shader_spritevertexshader);
+	GFX_SetPixelShader(shader_spritepixelshader);
+	GFX_SetVertexConstantBuffer(shader_spritevertexcbuffer);
+	GFX_SetSamplerState(0, shader_spritesampler);
+	GFX_SetTexture(texture, 0);
+	GFX_DrawPrimitives(6);
 
 	GFX_EnableBuffer(GFX_BUFFER_DEPTH, true);
 }

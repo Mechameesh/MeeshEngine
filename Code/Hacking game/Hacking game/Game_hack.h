@@ -21,11 +21,15 @@ enum
 
 /******************************************************/
 struct audio_buffer;
+struct scene_camera;
+struct scene_mesh;
+struct gfx_texture;
+
 struct game_hackmode : game_mode
 {
 	void Enter();
 	void Leave();
-	void Update();
+	void Update(int dt);
 	void Draw();
 
 	int packetTime;
@@ -34,7 +38,12 @@ struct game_hackmode : game_mode
 	short sounddata[HACK_MAXSOUNDBUFFER];
 	unsigned int sounddatasize;
 
+	scene_camera * camera;
+	scene_mesh * mesh;
+
 	audio_buffer * sound;	
+
+	gfx_texture * textures[2];
 
 	void GenerateHack();
 };

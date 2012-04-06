@@ -25,6 +25,9 @@ static ID3D11RasterizerState * gfx_renderstate;
 
 static bool gfx_vsync = false;
 
+static int gfx_xres = 0;
+static int gfx_yres = 0;
+
 static gfx_colour gfx_clearcolour = {0.0f, 0.0f, 0.0f, 1.0f};
 
 /*********************************************************************/
@@ -43,6 +46,9 @@ inline static bool gfx_CheckDXError(HRESULT hr)
 
 bool GFX_Init(gfx_initsettings settings)
 {
+	gfx_xres = settings.width;
+	gfx_yres = settings.height;
+
 	DXGI_SWAP_CHAIN_DESC swapdesc;
 	ZeroMemory(&swapdesc, sizeof(swapdesc));
 
@@ -165,7 +171,7 @@ bool GFX_Init(gfx_initsettings settings)
 	rasterdesc.DepthBias = 0;
 	rasterdesc.DepthBiasClamp = 0.0f;
 	rasterdesc.DepthClipEnable = true;
-	rasterdesc.FillMode = D3D11_FILL_SOLID;
+	rasterdesc.FillMode = D3D11_FILL_SOLID;	
 	rasterdesc.FrontCounterClockwise = false;
 	rasterdesc.MultisampleEnable = false;
 	rasterdesc.ScissorEnable = false;
@@ -218,9 +224,9 @@ void GFX_SetViewport(int width, int height, float zmin, float zmax)
 }
 
 
-void GFX_SetClearColour(gfx_colour cc)
+void GFX_SetClearColour(const gfx_colour * cc)
 {
-	gfx_clearcolour = cc;
+	gfx_clearcolour = *cc;
 }
 
 /*********************************************************************/
@@ -247,6 +253,18 @@ void GFX_Swap()
 
 /*********************************************************************/
 
+int GFX_GetXRes()
+{
+	return gfx_xres;
+}
+
+int GFX_GetYRes()
+{
+	return gfx_yres;
+}
+
+/*********************************************************************/
+
 gfx_pixelshader * GFX_LoadPixelShader(const char * filename, const char * entrypoint)
 {
 
@@ -262,8 +280,9 @@ gfx_pixelshader * GFX_LoadPixelShader(const char * filename, const char * entryp
 	if(FAILED(D3DX11CompileFromFile(filename, 0, 0, entrypoint, "ps_4_0", shaderflags, 0, 0, &shaderblob, &errorblob, 0)))
 	{
 		if(errorblob)
-		{
-			//debug output
+		{			
+			char * errors = (char*)errorblob->GetBufferPointer();
+			MessageBox(0, errors, "pixel shader compile error", MB_OK);
 			errorblob->Release();
 		}
 		return 0;
@@ -283,10 +302,27 @@ gfx_pixelshader * GFX_LoadPixelShader(const char * filename, const char * entryp
 
 /*********************************************************************/
 
+void GFX_SetVertexShader(gfx_vertexshader * shader)
+{
+	gfx_devicecontext->VSSetShader(shader->shader, 0, 0);
+	gfx_devicecontext->IASetInputLayout(shader->layout);
+}
+
+void GFX_SetPixelShader(gfx_pixelshader * shader)
+{
+	gfx_devicecontext->PSSetShader(shader->shader, 0, 0);
+}
+
+/*********************************************************************/
+
 gfx_texture * GFX_LoadTexture(const char * filename)
 {
 	gfx_texture * t = (gfx_texture*)malloc(sizeof(gfx_texture));	
-	D3DX11CreateShaderResourceViewFromFile(gfx_device, filename, 0, 0, &t->dxTexture, 0);
+	memset(t, 0, sizeof(gfx_texture));
+	D3DX11_IMAGE_LOAD_INFO info;
+	D3DX11CreateShaderResourceViewFromFile(gfx_device, filename, &info, 0, &t->dxTexture, 0);		
+	t->width = info.Width;
+	t->height = info.Height;	
 	return t;
 }
 
@@ -297,18 +333,16 @@ void GFX_FreeTexture(gfx_texture * texture)
 
 /*********************************************************************/
 
-static bool gfx_CreateVertexLayout(gfx_vertexshader * shader, ID3DBlob * shaderblob,  gfx_vertexdesc * desc)
+static bool gfx_CreateVertexLayout(gfx_vertexshader * shader, ID3DBlob * shaderblob,  gfx_vertexdesc * desc, unsigned int nsemantics)
 {	
-
-	unsigned int nelements = sizeof(*desc) / sizeof(desc[0]);	
+	D3D11_INPUT_ELEMENT_DESC * d3ddesc = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC) * nsemantics);
+	ZeroMemory(d3ddesc, sizeof(D3D11_INPUT_ELEMENT_DESC) * nsemantics);
 	
-	D3D11_INPUT_ELEMENT_DESC * d3ddesc = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC) * nelements);
-	
-	for(unsigned int i = 0; i < nelements; ++i)
-	{		
-		d3ddesc->SemanticName = desc[i].semantic;
-		d3ddesc[i].SemanticIndex = i;
-		switch(desc->vertexformat)		
+	for(unsigned int i = 0; i < nsemantics; ++i)
+	{	
+		d3ddesc[i].SemanticName = desc[i].semantic;		
+		d3ddesc[i].SemanticIndex = 0;
+		switch(desc[i].vertexformat)		
 		{
 		case GFX_VERTEXFORMAT_RG_FLOAT: d3ddesc[i].Format = DXGI_FORMAT_R32G32_FLOAT; break;
 		case GFX_VERTEXFORMAT_RG_UINT: d3ddesc[i].Format = DXGI_FORMAT_R32G32_UINT; break;
@@ -320,22 +354,28 @@ static bool gfx_CreateVertexLayout(gfx_vertexshader * shader, ID3DBlob * shaderb
 		default: return false;
 		}
 
-		d3ddesc[i].AlignedByteOffset = 0;
+		if(i == 0)
+			d3ddesc[i].AlignedByteOffset = 0;			
+		else
+			d3ddesc[i].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+
 		d3ddesc[i].InputSlot = 0;
 		d3ddesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;		
 		d3ddesc[i].InstanceDataStepRate = 0;
 	}
-
-	if(FAILED(gfx_device->CreateInputLayout(d3ddesc, nelements, shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), &shader->layout)))
-	{
+		
+	if(FAILED(gfx_device->CreateInputLayout(d3ddesc, nsemantics, shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), &shader->layout)))
+	{	
+		free(d3ddesc);
 		return false;
 	}
+	free(d3ddesc);
 	return true;
 }
 
 /*********************************************************************/
 
-gfx_vertexshader * GFX_LoadVertexShader(const char * filename, const char * entrypoint, gfx_vertexdesc * desc)
+gfx_vertexshader * GFX_LoadVertexShader(const char * filename, const char * entrypoint, gfx_vertexdesc * desc, unsigned int nsemantics)
 {
 
 	DWORD shaderflags = D3DCOMPILE_ENABLE_STRICTNESS;
@@ -351,13 +391,15 @@ gfx_vertexshader * GFX_LoadVertexShader(const char * filename, const char * entr
 	{
 		if(errorblob)
 		{
-			//debug output
+			char * errors = (char*)errorblob->GetBufferPointer();
+			MessageBox(0, errors, "vertex shader compile error", MB_OK);
 			errorblob->Release();
 		}
 		return 0;
 	}
 
 	gfx_vertexshader * shader = (gfx_vertexshader*)malloc(sizeof(gfx_vertexshader));
+	memset(shader, 0, sizeof(gfx_vertexshader));
 
 	if(FAILED(gfx_device->CreateVertexShader(shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), 0, &shader->shader)))
 	{
@@ -366,7 +408,7 @@ gfx_vertexshader * GFX_LoadVertexShader(const char * filename, const char * entr
 		return 0;
 	}
 
-	if(!gfx_CreateVertexLayout(shader, shaderblob, desc))
+	if(!gfx_CreateVertexLayout(shader, shaderblob, desc, nsemantics))
 	{
 		shader->shader->Release();
 		free(shader);
@@ -386,22 +428,34 @@ gfx_vertexbuffer * GFX_CreateVertexBuffer(void * vertices, unsigned int nvertice
 
 	res->stride = stride;
 
-	D3D11_BUFFER_DESC bufferdesc;
-	bufferdesc.Usage            = (staticbuffer) ? D3D11_USAGE_DEFAULT : D3D11_USAGE_DYNAMIC;
-	bufferdesc.ByteWidth        = stride * nvertices;
-	bufferdesc.BindFlags        = D3D11_BIND_VERTEX_BUFFER;
-	bufferdesc.CPUAccessFlags   = (staticbuffer) ? 0 : D3D11_CPU_ACCESS_WRITE;
-	bufferdesc.MiscFlags        = 0;
+	D3D11_BUFFER_DESC bufferdesc;	
+	bufferdesc.Usage				= (staticbuffer) ? D3D11_USAGE_DEFAULT : D3D11_USAGE_DYNAMIC;
+	bufferdesc.ByteWidth			= stride * nvertices;
+	bufferdesc.BindFlags			= D3D11_BIND_VERTEX_BUFFER;
+	bufferdesc.CPUAccessFlags		= (staticbuffer) ? 0 : D3D11_CPU_ACCESS_WRITE;	
+	bufferdesc.MiscFlags			= 0;
+	bufferdesc.StructureByteStride	= 0;	
 
-	D3D11_SUBRESOURCE_DATA initdata;
-    initdata.pSysMem = vertices;
-    initdata.SysMemPitch = 0;
-    initdata.SysMemSlicePitch = 0;
-
-	if(FAILED(gfx_device->CreateBuffer(&bufferdesc, &initdata, &res->vbuffer)))
+	if(!vertices)
 	{
-		GFX_FreeVertexBuffer(res);
-		return 0;
+		if(FAILED(gfx_device->CreateBuffer(&bufferdesc, 0, &res->vbuffer)))
+		{
+			GFX_FreeVertexBuffer(res);
+			return 0;
+		}
+	}
+	else
+	{
+		D3D11_SUBRESOURCE_DATA initdata;
+		initdata.pSysMem = vertices;
+		initdata.SysMemPitch = 0;
+		initdata.SysMemSlicePitch = 0;
+
+		if(FAILED(gfx_device->CreateBuffer(&bufferdesc, &initdata, &res->vbuffer)))
+		{
+			GFX_FreeVertexBuffer(res);
+			return 0;
+		}
 	}
 
 	return res;
@@ -432,11 +486,189 @@ void GFX_LockVertexBufferWrite(gfx_vertexbuffer * buffer, void ** data)
 	*data = (void*)res.pData;
 }
 
+void GFX_LockVertexBufferRead(gfx_vertexbuffer * buffer, void **data)
+{
+	D3D11_MAPPED_SUBRESOURCE res;
+	
+	if(FAILED(gfx_devicecontext->Map(buffer->vbuffer, 0, D3D11_MAP_READ, 0, &res)))
+	{
+		*data = 0;
+		return;
+	}
+	*data = (void*)res.pData;
+}
+
 void GFX_UnlockVertexBuffer(gfx_vertexbuffer * buffer)
 {
 	gfx_devicecontext->Unmap(buffer->vbuffer, 0);
 }
 
+/*********************************************************************/
+
+gfx_indexbuffer * GFX_CreateIndexBuffer(void * indices, unsigned int nindices, bool staticbuffer)
+{
+	gfx_indexbuffer * res = (gfx_indexbuffer*)malloc(sizeof(gfx_indexbuffer));	
+
+	D3D11_BUFFER_DESC bufferdesc;
+	bufferdesc.Usage            = (staticbuffer) ? D3D11_USAGE_DEFAULT : D3D11_USAGE_DYNAMIC;
+	bufferdesc.ByteWidth        = sizeof(unsigned int) * nindices;
+	bufferdesc.BindFlags        = D3D11_BIND_VERTEX_BUFFER;
+	bufferdesc.CPUAccessFlags   = (staticbuffer) ? 0 : D3D11_CPU_ACCESS_WRITE;
+	bufferdesc.MiscFlags        = 0;
+
+	D3D11_SUBRESOURCE_DATA initdata;
+    initdata.pSysMem = indices;
+    initdata.SysMemPitch = 0;
+    initdata.SysMemSlicePitch = 0;
+
+	if(FAILED(gfx_device->CreateBuffer(&bufferdesc, &initdata, &res->ibuffer)))
+	{
+		GFX_FreeIndexBuffer(res);
+		return 0;
+	}
+
+	return res;
+	
+}
+
+void GFX_FreeIndexBuffer(gfx_indexbuffer * buffer)
+{
+	buffer->ibuffer->Release();
+	buffer->ibuffer = 0;
+	free(buffer);
+	buffer = 0;
+}
+
+void GFX_SetCurrentIndexBuffer(gfx_indexbuffer * buffer, unsigned int offset)
+{
+	gfx_devicecontext->IASetIndexBuffer(buffer->ibuffer, DXGI_FORMAT_R32_UINT, offset);
+}
+
+void GFX_LockIndexBuffer(gfx_indexbuffer * buffer, void ** data)
+{
+	D3D11_MAPPED_SUBRESOURCE res;
+	
+	if(FAILED(gfx_devicecontext->Map(buffer->ibuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res)))
+	{
+		*data = 0;
+		return;
+	}
+	*data = (void*)res.pData;
+}
+
+void GFX_UnlockVertexBuffer(gfx_indexbuffer * buffer)
+{
+	gfx_devicecontext->Unmap(buffer->ibuffer, 0);
+}
+
+/*********************************************************************/
+
+gfx_constantbuffer * GFX_CreateConstantBuffer(unsigned int size)
+{
+	gfx_constantbuffer * res = (gfx_constantbuffer*)malloc(sizeof(gfx_constantbuffer));	
+
+	D3D11_BUFFER_DESC bufferdesc;
+	bufferdesc.Usage            = D3D11_USAGE_DEFAULT;
+	bufferdesc.ByteWidth		= size;
+	bufferdesc.BindFlags        = D3D11_BIND_CONSTANT_BUFFER;
+	bufferdesc.CPUAccessFlags   = 0;
+	bufferdesc.MiscFlags        = 0;
+
+	if(FAILED(gfx_device->CreateBuffer(&bufferdesc, 0, &res->cbuffer)))
+	{
+		GFX_FreeConstantBuffer(res);
+		return 0;
+	}
+
+	return res;	
+}
+
+void GFX_SetVertexConstantBuffer(gfx_constantbuffer * cb)
+{
+	gfx_devicecontext->VSSetConstantBuffers(0, 1, &cb->cbuffer);
+}
+
+void GFX_SetPixelConstantBuffer(gfx_constantbuffer * cb)
+{
+	gfx_devicecontext->PSSetConstantBuffers(0, 1, &cb->cbuffer);
+}
+
+void GFX_UpdateConstantBuffer(gfx_constantbuffer * cb, const void * data)
+{
+	gfx_devicecontext->UpdateSubresource(cb->cbuffer, 0, 0, data, 0, 0);
+}
+
+void GFX_FreeConstantBuffer(gfx_constantbuffer * buffer)
+{
+	if(buffer)
+	{
+		buffer->cbuffer->Release();
+		buffer->cbuffer = 0;
+		free(buffer);
+		buffer = 0;
+	}
+}
+
+/*********************************************************************/
+
+static D3D11_TEXTURE_ADDRESS_MODE gfx_AddressModeToDX(int address)
+{
+	switch(address)
+	{
+	case GFX_TEXTURE_ADDRESS_WRAP:			return D3D11_TEXTURE_ADDRESS_WRAP;
+	case GFX_TEXTURE_ADDRESS_MIRROR:		return D3D11_TEXTURE_ADDRESS_MIRROR;
+	case GFX_TEXTURE_ADDRESS_CLAMP:			return D3D11_TEXTURE_ADDRESS_CLAMP;
+	case GFX_TEXTURE_ADDRESS_BORDER:		return D3D11_TEXTURE_ADDRESS_BORDER;
+	case GFX_TEXTURE_ADDRESS_MIRROR_ONCE:	return D3D11_TEXTURE_ADDRESS_MIRROR_ONCE;
+	default:								return D3D11_TEXTURE_ADDRESS_WRAP;
+	}
+}
+
+gfx_samplerstate * GFX_CreateSamplerState(int filter, int addressU, int addressV, int addressW)
+{
+	gfx_samplerstate * state = (gfx_samplerstate *)malloc(sizeof(gfx_samplerstate));
+	memset(state, 0, sizeof(gfx_samplerstate));
+	D3D11_SAMPLER_DESC samplerDesc;
+    ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+
+	switch(filter)
+	{
+	case GFX_FILTER_MIN_MAG_MIP_POINT:					samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT; break;
+	case GFX_FILTER_MIN_MAG_POINT_MIP_LINEAR:			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR; break;
+	case GFX_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT:		samplerDesc.Filter = D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT; break;
+	case GFX_FILTER_MIN_POINT_MAG_MIP_LINEAR:			samplerDesc.Filter = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR; break;
+	case GFX_FILTER_MIN_MAG_MIP_LINEAR:					samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR; break;
+	case GFX_FILTER_ANISOTROPIC:						samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC; break;
+	case GFX_FILTER_COMPARISON_ANISOTROPIC:				samplerDesc.Filter = D3D11_FILTER_COMPARISON_ANISOTROPIC; break;
+	default:											samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR; break;
+	}
+	
+	samplerDesc.AddressU = gfx_AddressModeToDX(addressU);
+	samplerDesc.AddressV = gfx_AddressModeToDX(addressV);
+	samplerDesc.AddressW = gfx_AddressModeToDX(addressW);
+
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	if(FAILED(gfx_device->CreateSamplerState(&samplerDesc, &state->state)))
+	{
+		free(state);
+		return 0;
+	}
+
+	return state;
+}
+
+void GFX_FreeSamplerState(gfx_samplerstate * state)
+{
+	if(state->state)
+	{
+		state->state->Release();
+		state->state = 0;
+		free(state);
+		state = 0;
+	}	
+}
 /*********************************************************************/
 
 void GFX_EnableBuffer(int buffer, bool enable)
@@ -456,17 +688,27 @@ void GFX_SetPrimitiveType(int type)
 	}
 }
 
-void GFX_SetTexture(gfx_texture * tex, int level)
+void GFX_SetTexture(const gfx_texture * tex, int level)
 {
 
 	gfx_devicecontext->PSSetShaderResources(level, 1, &tex->dxTexture);
 }
 
+void GFX_SetSamplerState(int index, gfx_samplerstate * state)
+{
+	gfx_devicecontext->PSSetSamplers(index, 1, &state->state);
+}
+
 /*********************************************************************/
 
-void GFX_DrawPrimitives(gfx_vertexshader * vshader, gfx_pixelshader * pshader, unsigned int nverts)
+/*********************************************************************/
+
+void GFX_DrawPrimitives(unsigned int nverts)
 {
-	gfx_devicecontext->VSSetShader(vshader->shader, 0, 0);
-	gfx_devicecontext->PSSetShader(pshader->shader, 0, 0);
 	gfx_devicecontext->Draw(nverts, 0);
+}
+
+void GFX_DrawPrimitivesIndexed(unsigned int nindices)
+{
+	gfx_devicecontext->DrawIndexed(nindices, 0, 0);
 }

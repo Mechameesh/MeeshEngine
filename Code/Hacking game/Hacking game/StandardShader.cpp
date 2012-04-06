@@ -16,12 +16,12 @@ static gfx_colour shader_ambientcolour;
 
 void SHADER_InitStandardShader()
 {
-	gfx_vertexdesc desc[2];
-	sprintf_s(desc[0].semantic, 32, "POSITION");
-	desc[0].vertexformat = GFX_VERTEXFORMAT_RGBA_FLOAT;
-	sprintf_s(desc[1].semantic, 32, "TEXCOORD0");
-	desc[1].vertexformat = GFX_VERTEXFORMAT_RG_FLOAT;
+	gfx_vertexdesc desc[2] = 
+	{
+		{"POSITION", GFX_VERTEXFORMAT_RGBA_FLOAT},
+		{"TEXCOORD", GFX_VERTEXFORMAT_RG_FLOAT}
+	};
 
-	shader_standardvertexshader = GFX_LoadVertexShader("Standard.fx", "VS", desc);
-	shader_standardpixelshader = GFX_LoadPixelShader("Standard.fx", "PS");
+	shader_standardvertexshader = GFX_LoadVertexShader("data\\shaders\\Standard.fx", "VS", desc, 2);
+	shader_standardpixelshader = GFX_LoadPixelShader("data\\shaders\\Standard.fx", "PS");
 }

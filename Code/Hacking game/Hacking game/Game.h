@@ -21,7 +21,7 @@ struct game_mode
 {
 	virtual void Enter() = 0;
 	virtual void Leave() = 0;
-	virtual void Update() = 0;
+	virtual void Update(int dt) = 0;
 	virtual void Draw() = 0;
 };
 

@@ -50,6 +50,9 @@
     <ClCompile Include="SYS_File.cpp">
       <Filter>Engine\System</Filter>
     </ClCompile>
+    <ClCompile Include="FlatShader.cpp">
+      <Filter>Engine\Graphics\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Input.h">
@@ -97,6 +100,12 @@
     <ClInclude Include="SYS_File.h">
       <Filter>Engine\System</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="FlatShader.h">
+      <Filter>Engine\Graphics\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Engine">
@@ -141,6 +150,9 @@
       <Filter>Engine\Graphics\Shaders\HLSL</Filter>
     </None>
     <None Include="Standard.fx">
+      <Filter>Engine\Graphics\Shaders\HLSL</Filter>
+    </None>
+    <None Include="Flat.fx">
       <Filter>Engine\Graphics\Shaders\HLSL</Filter>
     </None>
   </ItemGroup>

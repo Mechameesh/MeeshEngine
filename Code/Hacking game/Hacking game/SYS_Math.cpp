@@ -1,6 +1,8 @@
 #include "SYS_Math.h"
 #include <math.h>
 
+
+
 /******************************************************************/
 
 void MATH_Vector2Add(math_vec2 * res, math_vec2 * a, math_vec2 * b)
@@ -97,6 +99,14 @@ float MATH_Vector3Length(math_vec3 * in)
 }
 
 /******************************************************************/
+
+void MATH_Matrix3Copy(math_matrix3 * res, const math_matrix3 * in)
+{
+	for(int i = 0; i < 3; ++i)
+		for(int j = 0; j < 3; ++j)
+			res->m[i][j] = in->m[i][j];
+}
+
 void MATH_Matrix3Identity(math_matrix3 * in)
 {
 	in->m[0][0] = 1.0f;
@@ -156,6 +166,13 @@ void MATH_Matrix3Transpose(math_matrix3 * res, math_matrix3 * in)
 
 /******************************************************************/
 
+void MATH_Matrix4Copy(math_matrix4 * res, const math_matrix4 * in)
+{
+	for(int i = 0; i < 4; ++i)
+		for(int j = 0; j < 4; ++j)
+			res->m[i][j] = in->m[i][j];
+}
+
 void MATH_Matrix4Identity(math_matrix4 * in)
 {
 	in->m[0][0] = 1.0f;
@@ -213,7 +230,7 @@ void MATH_Matrix4Concat(math_matrix4 * res, math_matrix4 * a, math_matrix4 * b)
 	res->m[3][3] = m33;
 }
 
-void MATH_Matrix4Ortho(math_matrix4 * in, float width, float height, float near, float far)
+/*void MATH_Matrix4Ortho(math_matrix4 * in, float width, float height, float near, float far)
 {
 	float z = far - near;
 
@@ -233,7 +250,7 @@ void MATH_Matrix4Ortho(math_matrix4 * in, float width, float height, float near,
 	in->m[3][1] = 0.0f;
 	in->m[3][2] = 0.0f;
 	in->m[3][3] = 1.0f;	
-}
+}*/
 
 void MATH_Matrix4Transpose(math_matrix4 * res, math_matrix4 * in)
 {	
@@ -267,3 +284,55 @@ void MATH_Matrix4Transpose(math_matrix4 * res, math_matrix4 * in)
 	res->m[3][2] = m32;
 	res->m[3][3] = in->m[3][3];
 }
+
+/******************************************************************/
+
+void MATH_Matrix4Projection(math_matrix4 * res, int width, int height, float fov, float znear, float zfar)
+{
+	//opengl style setup
+	float cotangent = 1.0f / tanf(fov / 2.0f);
+	
+	float aspectratio = (float)width / (float)height;
+	float planelength = zfar - znear;
+
+	res->m[0][0] = cotangent / aspectratio;
+	res->m[0][1] = 0.0f;
+	res->m[0][2] = 0.0f;
+	res->m[0][3] = 0.0f;
+	res->m[1][0] = 0.0f;
+	res->m[1][1] = cotangent;
+	res->m[1][2] = 0;
+	res->m[1][3] = 0;
+	res->m[2][0] = 0;
+	res->m[2][1] = 0;
+	res->m[2][2] = zfar / planelength;
+	res->m[2][3] = (znear * zfar) / planelength;
+	res->m[3][0] = 0;
+	res->m[3][1] = 0;
+	res->m[3][2] = -1.0f;
+	res->m[3][3] = 0.0f;
+}
+
+void MATH_Matrix4Ortho(math_matrix4 * res, int width, int height, float znear, float zfar)
+{
+	float planelength = zfar - znear;
+
+	res->m[0][0] = 2.0f / (float)width;
+	res->m[0][1] = 0.0f;
+	res->m[0][2] = 0.0f;
+	res->m[0][3] = 0.0f;
+	res->m[1][0] = 0.0f;
+	res->m[1][1] = 2.0f / (float)height;
+	res->m[1][2] = 0.0f;
+	res->m[1][3] = 0.0f;
+	res->m[2][0] = 0.0f;
+	res->m[2][1] = 0.0f;
+	res->m[2][2] = 1.0f / planelength;
+	res->m[2][3] = 0.0f;
+	res->m[3][0] = 0.0f;
+	res->m[3][1] = 0.0f;
+	res->m[3][2] = -znear / planelength;
+	res->m[3][3] = 1.0f;
+}
+
+/******************************************************************/

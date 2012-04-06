@@ -11,17 +11,25 @@ struct scene_uv
 	float v;
 };
 
+struct gfx_vertexbuffer;
+struct gfx_indexbuffer;
+
 struct scene_mesh
 {
-	int ntris;
-	int nvertices;
+	unsigned int ntris;
+	unsigned int nvertices;
 	math_vec3 * vertices;
 	math_vec3 * normals;
 	scene_uv * uv;
-	int nindices;
-	int * indices;
+	unsigned int nindices;
+	unsigned int * indices;
 	int parent;
+	gfx_vertexbuffer * vbuffer;
+	gfx_indexbuffer * ibuffer;
+
 };
+
+scene_mesh * SCENE_LoadMesh(const char * filename);
 
 /******************************************************************/
 

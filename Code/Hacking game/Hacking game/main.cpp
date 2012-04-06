@@ -4,6 +4,7 @@
 #include "Graphics.h"
 #include "Audio.h"
 #include "Timer.h"
+#include "Shaders.h"
 
 HINSTANCE hInstance;
 HWND hWnd;
@@ -30,11 +31,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		{
 			keyboard.keydown[wparam] = false;
 		} break;
-	case WM_QUIT:
+	case WM_DESTROY:	
 		{
-			GAME_ShutDown();
-			AUDIO_Shutdown();
-			GFX_Shutdown();
+			PostQuitMessage(0);
 		} break;
 	default:
 		return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -112,6 +111,8 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if(!AUDIO_Init(audioSettings))
 		return 0;
 
+	SHADER_InitShaders();
+
 	game_initsettings settings = SetupGameSettings();
 	if(!GAME_Init(settings))
 		return 0;
@@ -119,10 +120,12 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	TIME_Init();
 
 	MSG msg = {0};	
-	while(msg.message != WM_QUIT)
+	while(true)
 	{
-		if(PeekMessage(&msg, hWnd, 0, 0, PM_REMOVE))
+		if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
+			if(msg.message == WM_QUIT)
+				break;
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -133,5 +136,9 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
-	return 0;
+	GAME_ShutDown();
+	AUDIO_Shutdown();
+	GFX_Shutdown();
+
+	return msg.wParam;
 }

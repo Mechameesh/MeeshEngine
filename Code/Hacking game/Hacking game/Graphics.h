@@ -2,6 +2,8 @@
 #define GFX_H_INCLUDED
 #include <D3D11.h>
 
+#include "SCENE_Mesh.h"
+
 /*********************************************************************/
 enum
 {
@@ -31,6 +33,26 @@ enum gfx_shadertype
 {
 	GFX_SHADER_VS,
 	GFX_SHADER_PS
+};
+
+enum
+{
+	GFX_FILTER_MIN_MAG_MIP_POINT,
+	GFX_FILTER_MIN_MAG_POINT_MIP_LINEAR,
+	GFX_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT,
+	GFX_FILTER_MIN_POINT_MAG_MIP_LINEAR,
+	GFX_FILTER_MIN_MAG_MIP_LINEAR,
+	GFX_FILTER_ANISOTROPIC,
+	GFX_FILTER_COMPARISON_ANISOTROPIC,
+};
+
+enum
+{
+	GFX_TEXTURE_ADDRESS_WRAP,
+	GFX_TEXTURE_ADDRESS_MIRROR,
+	GFX_TEXTURE_ADDRESS_CLAMP,
+	GFX_TEXTURE_ADDRESS_BORDER,
+	GFX_TEXTURE_ADDRESS_MIRROR_ONCE	
 };
 
 /*********************************************************************/
@@ -75,27 +97,50 @@ struct gfx_vertexbuffer
 
 struct gfx_indexbuffer
 {
-	ID3D10Buffer * ibuffer;
+	ID3D11Buffer * ibuffer;
+};
+
+struct gfx_constantbuffer
+{
+	ID3D11Buffer * cbuffer;
 };
 
 struct gfx_texture
 {
 	int width;
-	int height;
-	int bpp;
+	int height;	
 	ID3D11ShaderResourceView * dxTexture;
+};
+
+struct gfx_samplerstate
+{
+	ID3D11SamplerState * state;
 };
 
 bool GFX_Init(gfx_initsettings settings);
 void GFX_Shutdown();
 void GFX_SetViewport(int width, int height, float zmin, float zmax);
 
+void GFX_SetClearColour(const gfx_colour * cc);
+
 void GFX_ClearBuffer(int buffers);
 void GFX_Swap();
 
 /*********************************************************************/
-gfx_vertexshader * GFX_LoadVertexShader(const char * filename, const char * entrypoint, gfx_vertexdesc * desc);
+
+int GFX_GetXRes();
+int GFX_GetYRes();
+
+/*********************************************************************/
+
+gfx_vertexshader * GFX_LoadVertexShader(const char * filename, const char * entrypoint, gfx_vertexdesc * desc, unsigned int nsemantics);
 gfx_pixelshader * GFX_LoadPixelShader(const char * filename, const char * entrypoint);
+
+/*********************************************************************/
+
+void GFX_SetVertexShader(gfx_vertexshader * shader);
+void GFX_SetPixelShader(gfx_pixelshader * shader);
+
 /*********************************************************************/
 
 gfx_texture * GFX_LoadTexture(const char * filename);
@@ -106,15 +151,36 @@ gfx_vertexbuffer * GFX_CreateVertexBuffer(void * vertices, unsigned int nvertice
 void GFX_FreeVertexBuffer(gfx_vertexbuffer * buffer);
 void GFX_SetCurrentVertexBuffer(gfx_vertexbuffer * buffer, unsigned int offset);
 
-void GFX_LockVertexBuffer(gfx_vertexbuffer * buffer, void ** data);
+void GFX_LockVertexBufferWrite(gfx_vertexbuffer * buffer, void ** data);
+void GFX_LockVertexBufferRead(gfx_vertexbuffer * buffer, void **data);
 void GFX_UnlockVertexBuffer(gfx_vertexbuffer * buffer);
 
 /*********************************************************************/
+
+gfx_indexbuffer * GFX_CreateIndexBuffer(void * indices, unsigned int nindices, bool staticbuffer);
+void GFX_FreeIndexBuffer(gfx_indexbuffer * buffer);
+void GFX_SetCurrentIndexBuffer(gfx_indexbuffer * buffer, unsigned int offset);
+
+void GFX_LockIndexBuffer(gfx_indexbuffer * buffer, void ** data);
+void GFX_UnlockVertexBuffer(gfx_indexbuffer * buffer);
+
+/*********************************************************************/
+gfx_constantbuffer * GFX_CreateConstantBuffer(unsigned int size);
+void GFX_SetVertexConstantBuffer(gfx_constantbuffer * cb);
+void GFX_SetPixelConstantBuffer(gfx_constantbuffer * cb);
+void GFX_UpdateConstantBuffer(gfx_constantbuffer * cb, const void * data);
+void GFX_FreeConstantBuffer(gfx_constantbuffer * buffer);
+/*********************************************************************/
+gfx_samplerstate * GFX_CreateSamplerState(int filter, int addressU, int addressV, int addressW);
+void GFX_FreeSamplerState(gfx_samplerstate * state);
+/*********************************************************************/
 void GFX_EnableBuffer(int buffer, bool enable);
 void GFX_SetPrimitiveType(int type);
-void GFX_SetTexture(gfx_texture * tex, int level);
+void GFX_SetTexture(const gfx_texture * tex, int level);
+void GFX_SetSamplerState(int index, gfx_samplerstate * state);
 /*********************************************************************/
-void GFX_DrawPrimitives(gfx_vertexshader * vshader, gfx_pixelshader * pshader, unsigned int nverts);
+void GFX_DrawPrimitives(unsigned int nverts);
+void GFX_DrawPrimitivesIndexed(unsigned int nindices);
 /*********************************************************************/
 
 
