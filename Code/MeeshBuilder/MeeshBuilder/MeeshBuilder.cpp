@@ -7,7 +7,9 @@
 int main(int argc, const char * argv[])
 {
 	if(argc == 2)
-		Convert3DS(argv[1]);
+		MESH_ConvertMesh(argv[1], 0);
+	else if(argc == 3)
+		MESH_ConvertMesh(argv[1], argv[2]);
 	else
 		printf("Need a .3ds file as input");
 	

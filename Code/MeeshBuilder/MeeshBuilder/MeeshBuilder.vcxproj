@@ -49,10 +49,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>d:\development\collada_dom-2.3.1-win32\include\collada-dom\1.5;d:\development\boost_1_49_0\;d:\development\collada_dom-2.3.1-win32\include\collada-dom;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>d:\development\collada_dom-2.3.1-win32\lib;d:\development\boost_1_49_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -78,16 +80,20 @@
     <ClInclude Include="file.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SYS_Math.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="file.cpp" />
+    <ClCompile Include="file_3dsloader.cpp" />
+    <ClCompile Include="file_colladaloader.cpp" />
     <ClCompile Include="MeeshBuilder.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SYS_Math.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

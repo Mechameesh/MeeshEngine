@@ -30,6 +30,9 @@
     <ClInclude Include="file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SYS_Math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,6 +45,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="file_3dsloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="file_colladaloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SYS_Math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
