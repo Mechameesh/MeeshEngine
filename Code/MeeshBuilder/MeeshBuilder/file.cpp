@@ -69,6 +69,19 @@ void FILE_ReadMat4(FILE * fp, math_matrix4 * m)
 	FILE_ReadFloat(fp, &m->m[3][3]);
 }
 
+int FILE_ReadString(FILE * fp, char * string, int maxlength)
+{
+	int nchars = 0;	
+	while(nchars < maxlength)
+	{
+		FILE_ReadChar(fp, &string[nchars]);
+		if(!string[nchars])
+			break;
+		nchars++;		
+	}
+	return nchars + 1;
+}
+
 /********************************************************/
 
 void FILE_WriteInt(FILE * fp, int n)
@@ -138,6 +151,22 @@ void FILE_WriteMat4(FILE * fp, math_matrix4 m)
 	FILE_WriteFloat(fp, m.m[3][2]);
 	FILE_WriteFloat(fp, m.m[3][3]);
 }
+
+int FILE_WriteString(FILE * fp, char * string, int maxlength)
+{
+	int nchars = 0;	
+	while(nchars < maxlength)
+	{
+		
+		FILE_WriteChar(fp, string[nchars]);
+		if(!string[nchars])
+			break;
+		nchars++;
+	}
+	return nchars + 1;
+}
+
+/********************************************************/
 
 size_t FILE_GetFileSize(FILE * fp)
 {

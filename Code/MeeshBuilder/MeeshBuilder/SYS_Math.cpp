@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "SYS_Math.h"
 
-
 /******************************************************************/
 
 void MATH_Vector2Add(math_vec2 * res, math_vec2 * a, math_vec2 * b)

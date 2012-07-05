@@ -11,7 +11,11 @@
 #include <tchar.h>
 #include <string>
 #include <math.h>
-
+#include <stdio.h>
+#include <cstdarg>
+#include <Windows.h>
+#include <IL\il.h>
+#include <string>
 
 
 // TODO: reference additional headers your program requires here

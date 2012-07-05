@@ -1,10 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>cube.3ds</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>chaoslord.fbx</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerWorkingDirectory>d:\meeshdev\edit\hack\models</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>d:\meeshdev\edit\hack\models\chaoslord</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerCommandArguments>boxtex.fbx</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>d:\meeshdev\edit\hack\models</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>
