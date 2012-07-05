@@ -46,9 +46,48 @@ void SYS_FileReadFloat(FILE * fp, float * f)
 	fread(f, sizeof(float), 1, fp);
 }
 
+void SYS_FileReadVec2(FILE * fp, math_vec2 * v)
+{
+	fread(&v->x, sizeof(float), 1, fp);
+	fread(&v->y, sizeof(float), 1, fp);	
+}
+
 void SYS_FileReadVec3(FILE * fp, math_vec3 * v)
 {
 	fread(&v->x, sizeof(float), 1, fp);
 	fread(&v->y, sizeof(float), 1, fp);
 	fread(&v->z, sizeof(float), 1, fp);
+}
+
+void SYS_FileReadMatrix4(FILE * fp, math_matrix4 * m)
+{
+	fread(&m->m[0][0], sizeof(float), 1, fp);
+	fread(&m->m[0][1], sizeof(float), 1, fp);
+	fread(&m->m[0][2], sizeof(float), 1, fp);
+	fread(&m->m[0][3], sizeof(float), 1, fp);
+	fread(&m->m[1][0], sizeof(float), 1, fp);
+	fread(&m->m[1][1], sizeof(float), 1, fp);
+	fread(&m->m[1][2], sizeof(float), 1, fp);
+	fread(&m->m[1][3], sizeof(float), 1, fp);
+	fread(&m->m[2][0], sizeof(float), 1, fp);
+	fread(&m->m[2][1], sizeof(float), 1, fp);
+	fread(&m->m[2][2], sizeof(float), 1, fp);
+	fread(&m->m[2][3], sizeof(float), 1, fp);
+	fread(&m->m[3][0], sizeof(float), 1, fp);
+	fread(&m->m[3][1], sizeof(float), 1, fp);
+	fread(&m->m[3][2], sizeof(float), 1, fp);
+	fread(&m->m[3][3], sizeof(float), 1, fp);
+}
+
+int SYS_FileReadString(FILE * fp, char * string, int maxlength)
+{
+	int nchars = 0;	
+	while(nchars < maxlength)
+	{
+		SYS_FileReadChar(fp, &string[nchars]);
+		if(!string[nchars])
+			break;
+		nchars++;		
+	}
+	return nchars + 1;
 }

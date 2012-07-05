@@ -1,12 +1,11 @@
 #include "SCENE_scene.h"
 #include "SCENE_Sprite.h"
+#include "SYS_Math.h"
 #include <string>
 
 scene_scene * SCENE_CreateScene()
 {
 	scene_scene * s = (scene_scene *)malloc(sizeof(scene_scene));
-
-
 
 	return s;
 }

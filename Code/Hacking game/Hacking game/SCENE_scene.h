@@ -9,12 +9,15 @@
 #define MAX_SPRITES 1024
 
 /*******************************************************************/
+struct gfx_texturecache;
+struct math_matrix4;
 
 struct scene_scene
 {
 	scene_camera camera[MAX_CAMERAS];
 	int currentcamera;
 
+	gfx_texturecache * spritetextures;
 	scene_sprite sprites[MAX_SPRITES];
 	int nsprites;
 };

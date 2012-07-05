@@ -80,16 +80,6 @@ static gfx_initsettings SetupGraphicsSettings()
 	return s;
 }
 
-static audio_initsettings SetupAudioSettings()
-{
-	audio_initsettings s;
-	s.frequency = 44100;
-	s.bits = 16;
-	s.channels = 2;
-	s.hwnd = hWnd;
-	return s;
-}
-
 static game_initsettings SetupGameSettings()
 {
 	game_initsettings s;
@@ -107,8 +97,7 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if(!GFX_Init(gfxSettings))
 		return 0;
 
-	audio_initsettings audioSettings = SetupAudioSettings();
-	if(!AUDIO_Init(audioSettings))
+	if(!AUDIO_Init())
 		return 0;
 
 	SHADER_InitShaders();

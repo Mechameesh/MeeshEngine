@@ -30,6 +30,16 @@ static int gfx_yres = 0;
 
 static gfx_colour gfx_clearcolour = {0.0f, 0.0f, 0.0f, 1.0f};
 
+static const gfx_colour gfx_defaultcolours[GFX_NCOLOURS] = 
+{
+	{1.0f, 1.0f, 1.0f, 1.0f},	//GFX_COLOUR_WHITE
+	{1.0f, 0.0f, 0.0f, 1.0f},	//GFX_COLOUR_RED
+	{0.0f, 1.0f, 0.0f, 1.0f},	//GFX_COLOUR_GREEN
+	{0.0f, 0.0f, 1.0f, 1.0f},	//GFX_COLOUR_BLUE
+	{0.0f, 0.0f, 0.0f, 1.0f}	//GFX_COLOUR_BLACK
+};
+
+
 /*********************************************************************/
 
 inline static bool gfx_CheckDXError(HRESULT hr)
@@ -184,6 +194,7 @@ bool GFX_Init(gfx_initsettings settings)
 	gfx_devicecontext->RSSetState(gfx_renderstate);
 
 	GFX_SetViewport(settings.width, settings.height, 0.0f, 1.0f);
+	GFX_SetClearColour(&settings.clearcolour);
 		
 	gfx_vsync = settings.vsync;
 	return true;
@@ -320,9 +331,8 @@ gfx_texture * GFX_LoadTexture(const char * filename)
 	gfx_texture * t = (gfx_texture*)malloc(sizeof(gfx_texture));	
 	memset(t, 0, sizeof(gfx_texture));
 	D3DX11_IMAGE_LOAD_INFO info;
-	D3DX11CreateShaderResourceViewFromFile(gfx_device, filename, &info, 0, &t->dxTexture, 0);		
-	t->width = info.Width;
-	t->height = info.Height;	
+	ZeroMemory(&info, sizeof(D3DX11_IMAGE_LOAD_INFO));	
+	gfx_CheckDXError(D3DX11CreateShaderResourceViewFromFile(gfx_device, filename, 0, NULL, &t->dxTexture, NULL));
 	return t;
 }
 
@@ -364,6 +374,7 @@ static bool gfx_CreateVertexLayout(gfx_vertexshader * shader, ID3DBlob * shaderb
 		d3ddesc[i].InstanceDataStepRate = 0;
 	}
 		
+	
 	if(FAILED(gfx_device->CreateInputLayout(d3ddesc, nsemantics, shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), &shader->layout)))
 	{	
 		free(d3ddesc);
@@ -700,8 +711,6 @@ void GFX_SetSamplerState(int index, gfx_samplerstate * state)
 
 /*********************************************************************/
 
-/*********************************************************************/
-
 void GFX_DrawPrimitives(unsigned int nverts)
 {
 	gfx_devicecontext->Draw(nverts, 0);
@@ -711,3 +720,12 @@ void GFX_DrawPrimitivesIndexed(unsigned int nindices)
 {
 	gfx_devicecontext->DrawIndexed(nindices, 0, 0);
 }
+
+/*********************************************************************/
+
+const gfx_colour * GFX_GetColour(int colour)
+{
+	return &gfx_defaultcolours[colour];
+}
+
+/*********************************************************************/

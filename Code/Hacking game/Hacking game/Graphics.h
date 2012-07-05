@@ -13,7 +13,6 @@ enum
 	GFX_BUFFER_STENCIL	= 1 << 2,
 };
 
-
 enum
 {
 	GFX_VERTEXFORMAT_RG_FLOAT,	
@@ -53,6 +52,16 @@ enum
 	GFX_TEXTURE_ADDRESS_CLAMP,
 	GFX_TEXTURE_ADDRESS_BORDER,
 	GFX_TEXTURE_ADDRESS_MIRROR_ONCE	
+};
+
+enum
+{
+	GFX_COLOUR_WHITE,
+	GFX_COLOUR_RED,
+	GFX_COLOUR_GREEN,
+	GFX_COLOUR_BLUE,
+	GFX_COLOUR_BLACK,
+	GFX_NCOLOURS
 };
 
 /*********************************************************************/
@@ -181,6 +190,12 @@ void GFX_SetSamplerState(int index, gfx_samplerstate * state);
 /*********************************************************************/
 void GFX_DrawPrimitives(unsigned int nverts);
 void GFX_DrawPrimitivesIndexed(unsigned int nindices);
+/*********************************************************************/
+
+const gfx_colour * GFX_GetColour(int colour);
+
+/*********************************************************************/
+
 /*********************************************************************/
 
 

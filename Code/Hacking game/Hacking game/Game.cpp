@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "Audio.h"
 #include "Game_hack.h"
+#include "GameEditor.h"
 #include "Timer.h"
 
 /***************************************************/
@@ -23,6 +24,7 @@ bool GAME_Init(game_initsettings settings)
 	memset(game_modestack, -1, sizeof(game_modestack));	
 
 	game_modes[GAME_MODE_HACK] = GAME_CreateHackMode();
+	game_modes[GAME_MODE_EDITOR] = GAME_CreateEditor();
 	
 	GAME_PushMode(GAME_MODE_HACK);
 	TIME_Start();
@@ -50,7 +52,7 @@ void GAME_Update()
 
 	int dt = TIME_GetDelta();
 
-	AUDIO_Update(dt);
+	AUDIO_Update();
 	
 	game_modes[game_modestack[game_modestackcurrent]]->Update(dt);	
 	

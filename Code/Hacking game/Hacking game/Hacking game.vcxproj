@@ -67,8 +67,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="AudioIO.cpp" />
+    <ClCompile Include="Debug.cpp" />
     <ClCompile Include="FlatShader.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameEditor.cpp" />
     <ClCompile Include="Game_hack.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -83,12 +86,16 @@
     <ClCompile Include="SYS_File.cpp" />
     <ClCompile Include="SYS_Math.cpp" />
     <ClCompile Include="SYS_Thread.cpp" />
+    <ClCompile Include="TextureCache.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Audio.h" />
+    <ClInclude Include="AudioIO.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="FlatShader.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameEditor.h" />
     <ClInclude Include="Game_hack.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Input.h" />
@@ -102,12 +109,13 @@
     <ClInclude Include="StandardShader.h" />
     <ClInclude Include="SYS_File.h" />
     <ClInclude Include="SYS_Math.h" />
+    <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Flat.fx" />
     <None Include="spriteshader.fx" />
-    <None Include="Standard.fx" />
+    <None Include="standard.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

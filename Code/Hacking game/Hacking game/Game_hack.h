@@ -43,8 +43,6 @@ struct game_hackmode : game_mode
 
 	audio_buffer * sound;	
 
-	gfx_texture * textures[2];
-
 	void GenerateHack();
 };
 
@@ -56,4 +54,4 @@ game_mode * GAME_CreateHackMode();
 
 /******************************************************/
 
-#endif GAME_HACK_H_INCLUDED
+#endif //GAME_HACK_H_INCLUDED

@@ -6,6 +6,7 @@
 /******************************************************/
 struct math_vec2;
 struct gfx_texture;
+struct scene_scene;
 /******************************************************/
 
 struct scene_sprite
@@ -16,11 +17,14 @@ struct scene_sprite
 	float rotation;
 	float rotatespeed;	
 	int texture;
-	int priority;
+	int priority;	
 };
 
 /******************************************************/
 
-void SCENE_SortSprites();
+void SCENE_SortSprites(scene_scene * scene);
+void SCENE_DrawSprites(scene_scene * scene);
+
+/******************************************************/
 
 #endif //SCENE_SPRITE_H_INCLUDED

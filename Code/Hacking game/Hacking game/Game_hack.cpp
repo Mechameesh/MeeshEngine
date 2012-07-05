@@ -7,6 +7,7 @@
 #include "Shaders.h"
 #include "Input.h"
 #include "Graphics.h"
+#include "Timer.h"
 
 #include <stdlib.h>
 #include <limits.h>
@@ -102,11 +103,11 @@ game_mode * GAME_CreateHackMode()
 
 void game_hackmode::Enter()
 {
-	textures[0] = GFX_LoadTexture("data/textures/kingdede.png");
-	textures[1] = GFX_LoadTexture("data/textures/placeholder.png");	
-	math_vec3 campos = {0.0, 0.0f, 50.0f};			
-	camera = SCENE_CreateCamera(M_PI / 2.0f, &campos, true);
+	math_vec3 campos = {0.0, 0.0f, 50.0f};	
+	camera = SCENE_CreateCamera(M_PI / 2.0f, &campos, false);
 
+
+	mesh = SCENE_LoadMesh("data/models/chaoslord.msh");
 	/*GenerateHack();
 
 	sound = AUDIO_CreateStreamBuffer(false, true, (char*)sounddata, sounddatasize);
@@ -122,22 +123,22 @@ void game_hackmode::Leave()
 }
 
 void game_hackmode::Update(int dt)
-{
+{	
 	const float CAMSPEED = 0.05f;
 	math_vec3 campos;
 	SCENE_GetCameraPos(camera, &campos);
 	if(INPUT_KeyDown('A'))
-		campos.x -= CAMSPEED * dt;
-	if(INPUT_KeyDown('D'))
 		campos.x += CAMSPEED * dt;
+	if(INPUT_KeyDown('D'))
+		campos.x -= CAMSPEED * dt;
 	if(INPUT_KeyDown('W'))
-		campos.z += CAMSPEED * dt;
-	if(INPUT_KeyDown('S'))
 		campos.z -= CAMSPEED * dt;
+	if(INPUT_KeyDown('S'))
+		campos.z += CAMSPEED * dt;
 	if(INPUT_KeyDown('Q'))
-		campos.y -= CAMSPEED * dt;
-	if(INPUT_KeyDown('E'))
 		campos.y += CAMSPEED * dt;
+	if(INPUT_KeyDown('E'))
+		campos.y -= CAMSPEED * dt;
 
 	SCENE_SetCameraPos(camera, &campos);
 	
@@ -149,10 +150,9 @@ void game_hackmode::Update(int dt)
 }
 
 void game_hackmode::Draw()
-{
-	gfx_colour colour = {1.0f, 1.0f, 1.0f, 1.0f};	
-	SHADER_RenderSprite(0, 0, 0.5f, 0.5f, textures[1], &colour);
-	SHADER_RenderSprite(0.5f, 0.5f, 0.5f, 0.5f, 0, &colour);	
+{	
+	SHADER_DrawMesh(mesh, SHADER_STANDARDSHADER);	
+	//SHADER_DrawMesh(mesh, SHADER_FLATSHADER);	
 }
 
 /******************************************************/

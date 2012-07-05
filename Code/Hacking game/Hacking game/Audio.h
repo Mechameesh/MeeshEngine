@@ -1,63 +1,47 @@
 #ifndef AUDIO_H_INCLUDED
 #define AUDIO_H_INCLUDED
 
+/******************************************************/
+
 #include <Windows.h>
+#include <MMSystem.h>
+#include <XAudio2.h>
 
-
-
-struct IDirectSoundBuffer8;
-struct IDirectSound3DBuffer8;
-
-/******************************************************/
-
-struct audio_initsettings
-{	
-	int frequency;
-	int bits;
-	int channels;	
-	HWND hwnd;
-};
-
-struct stream_info
-{	
-	char * source;
-	unsigned int sourcesize;
-	unsigned int sourcepos;
-};
-
-struct audio_buffer
+enum
 {
-	IDirectSoundBuffer8 * buffer;
-	IDirectSound3DBuffer8 * buffer3D;	
-	unsigned int size;
-	bool looping;	
-	bool isstream;
-	stream_info stream;
+	AUDIO_CONTEXT_SFX,
+	AUDIO_CONTEXT_SFX3D,
+	AUDIO_CONTEXT_MUSIC,
+	AUDIO_NCONTEXTS
 };
+
+enum
+{
+	AUDIO_STATE_STOPPED,
+	AUDIO_STATE_PLAYING,
+	AUDIO_STATE_PAUSED
+};
+
+struct audio_sound
+{
+	WAVEFORMATEX wfx;
+	void * data;
+	XAUDIO2_BUFFER buffer;
+	int context;
+};
+
+struct audio_context
+{	
+	IXAudio2SubmixVoice * mixvoice;	
+	int nvoices;
+};
+
 
 /******************************************************/
 
-bool AUDIO_Init(audio_initsettings);
+bool AUDIO_Init();
 void AUDIO_Shutdown();
 
-audio_buffer * AUDIO_LoadFile(const char * filename);
+void AUDIO_Update();
 
-audio_buffer * AUDIO_CreateStreamBuffer(bool is3d, bool looping, char * source, unsigned int sourcelength);
-void AUDIO_FreeBuffer(audio_buffer * b);
-
-void AUDIO_SetVolume(audio_buffer * b, float volume);
-void AUDIO_SetLooping(audio_buffer * b, bool looping);
-void AUDIO_Play(audio_buffer * b);
-void AUDIO_Pause(audio_buffer * b);
-void AUDIO_Stop(audio_buffer * b);
-
-int AUDIO_RegisterStream(audio_buffer * b);
-int AUDIO_UnRegisterStream(audio_buffer * b);
-
-/******************************************************/
-
-void AUDIO_Update(unsigned int dt);
-
-/******************************************************/
-
-#endif AUDIO_H_INCLUDED
+#endif //AUDIO_H_INCLUDED

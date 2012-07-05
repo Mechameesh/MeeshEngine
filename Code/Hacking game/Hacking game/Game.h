@@ -7,14 +7,14 @@ enum game_modetypes
 {
 	//GAME_MODE_MENU,
 	GAME_MODE_HACK,
+	GAME_MODE_EDITOR,
 	GAME_NMODES
 };
 
 /************************************************************/
 
 struct game_initsettings
-{
-	
+{	
 };
 
 struct game_mode
