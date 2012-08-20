@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <Windowsx.h>
 #include "game.h"
 #include "input.h"
 #include "Graphics.h"
@@ -10,6 +11,7 @@ HINSTANCE hInstance;
 HWND hWnd;
 
 extern input_keyboard keyboard;
+extern input_mouse mouse;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -30,6 +32,70 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	case WM_KEYUP:
 		{
 			keyboard.keydown[wparam] = false;
+		} break;
+	case WM_CHAR:
+		{			
+			char input = wparam;
+
+			if(input = '\b')
+			{
+				if(keyboard.bufferpos > 1)
+				{
+					keyboard.bufferpos--;
+					keyboard.buffer[keyboard.bufferpos] = 0;
+				}
+			}
+			else if(keyboard.filter[input])
+			{
+				if(keyboard.bufferpos < (INPUT_KEYBOARDBUFFER_SIZE - 1))
+				{
+					keyboard.buffer[keyboard.bufferpos] = input;
+					keyboard.bufferpos++;
+					keyboard.buffer[keyboard.bufferpos] = 0;
+				}
+			}
+		} break;
+	case WM_LBUTTONDOWN:
+		{
+			mouse.buttondown[INPUT_MOUSE_LBUTTON] = true;
+		} break;
+	case WM_LBUTTONUP:
+		{
+			mouse.buttondown[INPUT_MOUSE_LBUTTON] = false;
+		} break;
+	case WM_MBUTTONDOWN:
+		{
+			mouse.buttondown[INPUT_MOUSE_MBUTTON] = true;
+		} break;
+	case WM_MBUTTONUP:
+		{
+			mouse.buttondown[INPUT_MOUSE_MBUTTON] = false;
+		} break;
+	case WM_RBUTTONDOWN:
+		{
+			mouse.buttondown[INPUT_MOUSE_RBUTTON] = true;
+		} break;
+	case WM_RBUTTONUP:
+		{
+			mouse.buttondown[INPUT_MOUSE_RBUTTON] = false;
+		} break;
+	case WM_MOUSEMOVE:
+		{
+			int xpos = GET_X_LPARAM(lparam);
+			int ypos = GET_Y_LPARAM(lparam);
+			if(mouse.locked)
+			{	
+				int centerx = GFX_GetXRes() / 2;
+				int centery = GFX_GetYRes() / 2;
+				mouse.deltax = xpos - centerx;
+				mouse.deltay = ypos - centery;
+				SetCursorPos(centerx, centery);
+			}
+			else
+			{
+				mouse.xpos = xpos;
+				mouse.ypos = ypos;
+			}
 		} break;
 	case WM_DESTROY:	
 		{
@@ -107,6 +173,8 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 
 	TIME_Init();
+	INPUT_Init();
+	INPUT_ApplyDefaultFilter();
 
 	MSG msg = {0};	
 	while(true)
