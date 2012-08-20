@@ -126,6 +126,23 @@ struct gfx_samplerstate
 	ID3D11SamplerState * state;
 };
 
+struct gfx_uv
+{
+	float u0;	
+	float v0;
+	float u1;
+	float v1;	
+};
+
+struct gfx_font
+{
+	gfx_texture * texture;
+	int ncharacters;
+	char * characters;
+	gfx_uv * uvs;
+	unsigned char * advances;
+};
+
 bool GFX_Init(gfx_initsettings settings);
 void GFX_Shutdown();
 void GFX_SetViewport(int width, int height, float zmin, float zmax);
@@ -195,6 +212,18 @@ void GFX_DrawPrimitivesIndexed(unsigned int nindices);
 const gfx_colour * GFX_GetColour(int colour);
 
 /*********************************************************************/
+
+gfx_font * GFX_LoadFont(const char * filename);
+void GFX_FreeFont(gfx_font * font);
+void GFX_SetFont(gfx_font * font);
+void GFX_SetTextPos2D(float x, float y);
+void GFX_SetTextPos2Dabs(int x, int y);
+void GFX_SetTextPos3D(const math_matrix4 * world);
+void GFX_SetLineHeight(int height);
+void GFX_SetCharacterSpace(int space);
+void GFX_SetTextSize(float x, float y);
+void GFX_SetTextColour(gfx_colour * colour);
+void GFX_PrintText2D(char * string, ...);
 
 /*********************************************************************/
 
